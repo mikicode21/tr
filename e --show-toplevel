@@ -1,0 +1,118 @@
+GIT-REV-PARSE(1)                                                                         Git Manual                                                                        GIT-REV-PARSE(1)
+
+NNAAMMEE
+       git-rev-parse - Pick out and massage parameters
+
+SSYYNNOOPPSSIISS
+       _g_i_t _r_e_v_-_p_a_r_s_e [<options>] <args>...
+
+DDEESSCCRRIIPPTTIIOONN
+       Many Git porcelainish commands take mixture of flags (i.e. parameters that begin with a dash _-) and parameters meant for the underlying _g_i_t _r_e_v_-_l_i_s_t command they use internally and
+       flags and parameters for the other commands they use downstream of _g_i_t _r_e_v_-_l_i_s_t. This command is used to distinguish between them.
+
+OOPPTTIIOONNSS
+   OOppeerraattiioonn MMooddeess
+       Each of these options must appear first on the command line.
+
+       --parseopt
+           Use _g_i_t _r_e_v_-_p_a_r_s_e in option parsing mode (see PARSEOPT section below).
+
+       --sq-quote
+           Use _g_i_t _r_e_v_-_p_a_r_s_e in shell quoting mode (see SQ-QUOTE section below). In contrast to the ----ssqq option below, this mode does only quoting. Nothing else is done to command input.
+
+   OOppttiioonnss ffoorr ----ppaarrsseeoopptt
+       --keep-dashdash
+           Only meaningful in ----ppaarrsseeoopptt mode. Tells the option parser to echo out the first ---- met instead of skipping it.
+
+       --stop-at-non-option
+           Only meaningful in ----ppaarrsseeoopptt mode. Lets the option parser stop at the first non-option argument. This can be used to parse sub-commands that take options themselves.
+
+       --stuck-long
+           Only meaningful in ----ppaarrsseeoopptt mode. Output the options in their long form if available, and with their arguments stuck.
+
+   OOppttiioonnss ffoorr FFiilltteerriinngg
+       --revs-only
+           Do not output flags and parameters not meant for _g_i_t _r_e_v_-_l_i_s_t command.
+
+       --no-revs
+           Do not output flags and parameters meant for _g_i_t _r_e_v_-_l_i_s_t command.
+
+       --flags
+           Do not output non-flag parameters.
+
+       --no-flags
+           Do not output flag parameters.
+
+   OOppttiioonnss ffoorr OOuuttppuutt
+       --default <arg>
+           If there is no parameter given by the user, use <<aarrgg>> instead.
+
+       --prefix <arg>
+           Behave as if _g_i_t _r_e_v_-_p_a_r_s_e was invoked from the <<aarrgg>> subdirectory of the working tree. Any relative filenames are resolved as if they are prefixed by <<aarrgg>> and will be printed
+           in that form.
+
+           This can be used to convert arguments to a command run in a subdirectory so that they can still be used after moving to the top-level of the repository. For example:
+
+               prefix=$(git rev-parse --show-prefix)
+               cd "$(git rev-parse --show-toplevel)"
+               # rev-parse provides the -- needed for 'set'
+               eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
+
+       --verify
+           Verify that exactly one parameter is provided, and that it can be turned into a raw 20-byte SHA-1 that can be used to access the object database. If so, emit it to the standard
+           output; otherwise, error out.
+
+           If you want to make sure that the output actually names an object in your object database and/or can be used as a specific type of object you require, you can add the ^^{{ttyyppee}}
+           peeling operator to the parameter. For example, ggiitt rreevv--ppaarrssee ""$$VVAARR^^{{ccoommmmiitt}}"" will make sure $$VVAARR names an existing object that is a commit-ish (i.e. a commit, or an annotated
+           tag that points at a commit). To make sure that $$VVAARR names an existing object of any type, ggiitt rreevv--ppaarrssee ""$$VVAARR^^{{oobbjjeecctt}}"" can be used.
+
+       -q, --quiet
+           Only meaningful in ----vveerriiffyy mode. Do not output an error message if the first argument is not a valid object name; instead exit with non-zero status silently. SHA-1s for valid
+           object names are printed to stdout on success.
+
+       --sq
+           Usually the output is made one line per flag and parameter. This option makes output a single line, properly quoted for consumption by shell. Useful when you expect your
+           parameter to contain whitespaces and newlines (e.g. when using pickaxe --SS with _g_i_t _d_i_f_f_-_*). In contrast to the ----ssqq--qquuoottee option, the command input is still interpreted as
+           usual.
+
+       --short[=length]
+           Same as ----vveerriiffyy but shortens the object name to a unique prefix with at least lleennggtthh characters. The minimum length is 4, the default is the effective value of the ccoorree..aabbbbrreevv
+           configuration variable (see ggiitt--ccoonnffiigg(1)).
+
+       --not
+           When showing object names, prefix them with _^ and strip _^ prefix from the object names that already have one.
+
+       --abbrev-ref[=(strict|loose)]
+           A non-ambiguous short name of the objects name. The option core.warnAmbiguousRefs is used to select the strict abbreviation mode.
+
+       --symbolic
+           Usually the object names are output in SHA-1 form (with possible _^ prefix); this option makes them output in a form as close to the original input as possible.
+
+       --symbolic-full-name
+           This is similar to --symbolic, but it omits input that are not refs (i.e. branch or tag names; or more explicitly disambiguating "heads/master" form, when you want to name the
+           "master" branch when there is an unfortunately named tag "master"), and show them as full refnames (e.g. "refs/heads/master").
+
+   OOppttiioonnss ffoorr OObbjjeeccttss
+       --all
+           Show all refs found in rreeffss//.
+
+       --branches[=pattern], --tags[=pattern], --remotes[=pattern]
+           Show all branches, tags, or remote-tracking branches, respectively (i.e., refs found in rreeffss//hheeaaddss, rreeffss//ttaaggss, or rreeffss//rreemmootteess, respectively).
+
+           If a ppaatttteerrnn is given, only refs matching the given shell glob are shown. If the pattern does not contain a globbing character (??, **, or [[), it is turned into a prefix match by
+           appending //**.
+
+       --glob=pattern
+           Show all refs matching the shell glob pattern ppaatttteerrnn. If the pattern does not start with rreeffss//, this is automatically prepended. If the pattern does not contain a globbing
+           character (??, **, or [[), it is turned into a prefix match by appending //**.
+
+       --exclude=<glob-pattern>
+           Do not include refs matching _<_g_l_o_b_-_p_a_t_t_e_r_n_> that the next ----aallll, ----bbrraanncchheess, ----ttaaggss, ----rreemmootteess, or ----gglloobb would otherwise consider. Repetitions of this option accumulate
+           exclusion patterns up to the next ----aallll, ----bbrraanncchheess, ----ttaaggss, ----rreemmootteess, or ----gglloobb option (other options or arguments do not clear accumulated patterns).
+
+           The patterns given should not begin with rreeffss//hheeaaddss, rreeffss//ttaaggss, or rreeffss//rreemmootteess when applied to ----bbrraanncchheess, ----ttaaggss, or ----rreemmootteess, respectively, and they must begin with rreeffss//
+           when applied to ----gglloobb or ----aallll. If a trailing _/_* is intended, it must be given explicitly.
+
+       --disambiguate=<prefix>
+           Show every object whose name begins with the given prefix. The <prefix> must be at least 4 hexadecimal digits long to avoid listing each and every object in the repository by
+        
